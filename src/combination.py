@@ -6,15 +6,8 @@ body_mask = np.load("../data/im9body_seg.npy", allow_pickle=True).item()["masks"
 outflow_mask = np.load("../data/im9outflows_seg.npy", allow_pickle=True).item()["masks"]
 combined_mask = np.load("../data/im9combi_seg.npy", allow_pickle=True).item()["masks"]
 
-body_outlines = np.load("../data/imbody1_seg.npy", allow_pickle=True).item()["outlines"]
-outflow_outlines = np.load("../data/imtails_seg.npy", allow_pickle=True).item()[
-    "outlines"
-]
-combined_outlines = np.load("../data/imcomb_seg.npy", allow_pickle=True).item()[
-    "outlines"
-]
 
-overlap_threshold = 0.2
+overlap_threshold = 0.25
 
 
 img_shape = body_mask.shape  # (height, width)
@@ -42,6 +35,9 @@ def extend_and_merge_masks(mask1, mask2, overlap_threshold):
 
             if overlap / mask2_area > overlap_threshold:
                 overlapping_labels.append(label1)
+                # print(
+                #     f"Overlap detected between {label1} and {label2}: {overlap / mask2_area}"
+                # )
 
         if overlapping_labels:
             for ol_label in overlapping_labels:
@@ -55,23 +51,5 @@ def extend_and_merge_masks(mask1, mask2, overlap_threshold):
     return extended_mask
 
 
-extended_mask = extend_and_merge_masks(combined_mask, outflow_mask, overlap_threshold)
-extended_mask = extend_and_merge_masks(extended_mask, body_mask, overlap_threshold)
-
-
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-
-axs[0, 0].imshow(combined_mask, cmap="rainbow")
-axs[0, 0].set_title("Combined Mask")
-
-axs[0, 1].imshow(body_mask, cmap="rainbow")
-axs[0, 1].set_title("Body Mask")
-
-axs[1, 0].imshow(outflow_mask, cmap="rainbow")
-axs[1, 0].set_title("Outflow Mask")
-
-axs[1, 1].imshow(extended_mask, cmap="rainbow")
-axs[1, 1].set_title("Extended Mask")
-
-plt.tight_layout()
-plt.show()
+# extended_mask = extend_and_merge_masks(combined_mask, outflow_mask, overlap_threshold)
+# extended_mask = extend_and_merge_masks(extended_mask, body_mask, overlap_threshold)
