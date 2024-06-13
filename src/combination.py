@@ -1,16 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
-# Load the masks and outlines
-body_mask = np.load("../data/im9body_seg.npy", allow_pickle=True).item()["masks"]
-outflow_mask = np.load("../data/im9outflows_seg.npy", allow_pickle=True).item()["masks"]
-combined_mask = np.load("../data/im9combi_seg.npy", allow_pickle=True).item()["masks"]
-
-
-overlap_threshold = 0.25
-
-
-img_shape = body_mask.shape  # (height, width)
 
 
 def extend_and_merge_masks(mask1, mask2, overlap_threshold):
@@ -51,5 +39,22 @@ def extend_and_merge_masks(mask1, mask2, overlap_threshold):
     return extended_mask
 
 
-# extended_mask = extend_and_merge_masks(combined_mask, outflow_mask, overlap_threshold)
-# extended_mask = extend_and_merge_masks(extended_mask, body_mask, overlap_threshold)
+def combine_masks(
+    data_path, overlap_threshold_processes=0.15, overlap_threshold_body=0.35
+):
+    body_mask = np.load(data_path + "/s2_mean_image_seg.npy", allow_pickle=True).item()[
+        "masks"
+    ]
+    outflow_mask = np.load(
+        data_path + "/s3_mean_image_seg.npy", allow_pickle=True
+    ).item()["masks"]
+    combined_mask = np.load(
+        data_path + "/s1_mean_image_seg.npy", allow_pickle=True
+    ).item()["masks"]
+
+    masks = extend_and_merge_masks(
+        combined_mask, outflow_mask, overlap_threshold_processes
+    )
+    masks = extend_and_merge_masks(masks, body_mask, overlap_threshold_body)
+
+    return masks
