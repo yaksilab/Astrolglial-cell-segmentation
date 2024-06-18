@@ -1,3 +1,8 @@
+"""
+Taken from issue 292 in cellpose repo, written by @neurochatter, check it out here:
+https://github.com/MouseLand/suite2p/issues/292#issuecomment-1539041902
+"""
+
 import numpy as np
 import suite2p
 from suite2p.detection import roi_stats

@@ -2,6 +2,18 @@ import numpy as np
 
 
 def extend_and_merge_masks(mask1, mask2, overlap_threshold):
+    """
+    extends mask1 using mask2 by merging regions that overlap more than overlap_threshold
+
+    Args:
+        mask1 (numpy.ndarray): first mask
+        mask2 (numpy.ndarray): second mask
+        overlap_threshold (float):  relativ overlap threshold
+
+    Returns:
+       merged masks (numpy.ndarray): extended and merged mask
+    """
+
     labels1 = np.unique(mask1)
     labels2 = np.unique(mask2)
     labels1 = labels1[labels1 != 0]  # excluding background
@@ -42,6 +54,18 @@ def extend_and_merge_masks(mask1, mask2, overlap_threshold):
 def combine_masks(
     data_path, overlap_threshold_processes=0.15, overlap_threshold_body=0.35
 ):
+    """
+    Combines the masks from the three cellpose models
+
+    Args:
+        data_path (str): path to the data folder
+        overlap_threshold_processes (float, optional): overlap threshold for processes. Defaults to 0.15.
+        overlap_threshold_body (float, optional): overlap threshold for body. Defaults to 0.35.
+
+    Returns:
+        numpy.ndarray: combined masks
+    """
+
     body_mask = np.load(data_path + "/s2_mean_image_seg.npy", allow_pickle=True).item()[
         "masks"
     ]
