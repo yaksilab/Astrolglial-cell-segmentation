@@ -60,14 +60,13 @@ def segment_cells(data_path, model_dirs=model_dirs):
         print(f"Segmenting using {model_dir}")
         model = models.CellposeModel(pretrained_model=model_dir)
         # Save mean_image as PNG for compatibility with Cellpose
-        plt.imsave(
-            data_path + f"/{model_dir[14:16]}_mean_image.png", mean_image, cmap="gray"
-        )
+        model_name = os.path.basename(model_dir)
+        plt.imsave(data_path + f"/{model_name}_mean_image.png", mean_image, cmap="gray")
 
         flows = cellpose_segmentation(
             mean_image,
             model,
-            file_name=data_path + f"/{model_dir[14:16]}_mean_image",
+            file_name=data_path + f"/{model_name}_mean_image",
         )
 
     masks = combine_masks(data_path)
