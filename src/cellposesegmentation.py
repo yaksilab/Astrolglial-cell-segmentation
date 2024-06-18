@@ -53,7 +53,12 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
 
 
 def segment_cells(data_path, model_dirs=model_dirs):
-    ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
+
+    try:
+        ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
+    except FileNotFoundError:
+        print("Ops file not found.")
+        raise SystemExit
     mean_image = ops["meanImg"]
 
     for model_dir in model_dirs:

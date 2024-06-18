@@ -1,5 +1,5 @@
 """
-Taken from issue 292 in cellpose repo, written by @neurochatter, check it out here:
+Taken from issue #292 in cellpose gitHub repo, written by @neurochatter, check it out here:
 https://github.com/MouseLand/suite2p/issues/292#issuecomment-1539041902
 """
 
@@ -17,12 +17,21 @@ from pathlib import Path
 
 def create_suite2p_masks_extract_traces(working_dir):
     wd = Path(working_dir)
-    ops = np.load(wd / "ops.npy", allow_pickle=True).item()
+    ops_file = wd / "ops.npy"
+    if not ops_file.exists():
+        raise FileNotFoundError(f"Ops file not found: {ops_file}")
+
+    ops = np.load(ops_file, allow_pickle=True).item()
     Lx = ops["Lx"]
     Ly = ops["Ly"]
     f_reg = suite2p.io.BinaryFile(Ly, Lx, wd / "data.bin")
 
     cellpose_fpath = wd / "combined_mean_image_seg.npy"
+    if not cellpose_fpath.exists():
+        raise FileNotFoundError(
+            f"The combined mask file is not found: {cellpose_fpath}"
+        )
+
     cellpose_masks = np.load(cellpose_fpath, allow_pickle=True).item()
     masks = cellpose_masks["masks"]
 

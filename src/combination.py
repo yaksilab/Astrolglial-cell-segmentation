@@ -1,4 +1,5 @@
 import numpy as np
+import glob
 
 
 def extend_and_merge_masks(mask1, mask2, overlap_threshold):
@@ -66,15 +67,18 @@ def combine_masks(
         numpy.ndarray: combined masks
     """
 
-    body_mask = np.load(data_path + "/s2_mean_image_seg.npy", allow_pickle=True).item()[
-        "masks"
-    ]
-    outflow_mask = np.load(
-        data_path + "/s3_mean_image_seg.npy", allow_pickle=True
-    ).item()["masks"]
-    combined_mask = np.load(
-        data_path + "/s1_mean_image_seg.npy", allow_pickle=True
-    ).item()["masks"]
+    try:
+        combined_mask_file = glob.glob(data_path + "/*s1*.npy")[0]
+        body_mask_file = glob.glob(data_path + "/*s2*.npy")[0]
+        outflow_mask_file = glob.glob(data_path + "/*s3*.npy")[0]
+    except IndexError:
+        raise FileNotFoundError(
+            "One or more mask files not found in the specified data path. Looking for files with s1, s2, s3 in the name."
+        )
+
+    body_mask = np.load(body_mask_file, allow_pickle=True).item()["masks"]
+    outflow_mask = np.load(outflow_mask_file, allow_pickle=True).item()["masks"]
+    combined_mask = np.load(combined_mask_file, allow_pickle=True).item()["masks"]
 
     masks = extend_and_merge_masks(
         combined_mask, outflow_mask, overlap_threshold_processes
