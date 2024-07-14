@@ -1,2 +1,53 @@
 # Astrolglial-cell-segmentation
-This projects refines astroglial cell segmentation from cellpose models and extract traces for segmented cells from suite2p 
+
+This project aims to segment astroglial cells from mean images generated from motion corrected movie in suite2p. 
+
+## Installation
+
+Clone the repository and install the required packages using the following command:
+
+```bash
+git clone https://github.com/yaksilab/Astrolglial-cell-segmentation.git
+```
+
+Open Anaconda promt and create an anaconda environment with the projects environment.yml file:
+
+```bash
+cd Astrolglial-cell-segmentation
+```
+
+```bash
+conda env create -f environment.yml
+```
+
+Activate the environment:
+
+```bash
+conda activate Astroglial-segmentation
+```
+
+install the dependencies from the projects requirements.txt file:
+
+```bash
+pip install -r requirements.txt
+```
+
+
+## Usage
+ Activate the environment:
+
+```bash
+conda activate Astroglial-segmentation
+```
+
+Go into the project directory:
+
+```bash
+cd Astrolglial-cell-segmentation
+```
+
+Run the pipeline on your suite2p output folder:
+
+```bash
+python -m src.pipeline <path to your suit2p output folder>
+```
