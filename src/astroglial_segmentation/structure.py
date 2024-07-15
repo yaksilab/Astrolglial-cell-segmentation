@@ -3,10 +3,8 @@ import pprint
 import matplotlib.pyplot as plt
 
 
-data = np.load("../data/im1_seg.npy", allow_pickle=True).item()
-print(type(data))
-
-print("Keys in data: \n", data.keys())
+# data = np.load("../data/im1_seg.npy", allow_pickle=True).item()
+#print("Keys in data: \n", data.keys())
 
 
 def print_data_structure(data, indent=""):
@@ -28,7 +26,7 @@ def print_data_structure(data, indent=""):
             print_data_structure(data[key], indent + "  ")
 
 
-print_data_structure(data)
+# print_data_structure(data)
 
-print("Colors: \n", data["colors"][0:2])
-print("chan_choose: \n", data["chan_choose"])
+# print("Colors: \n", data["colors"][0:2])
+# print("chan_choose: \n", data["chan_choose"])
