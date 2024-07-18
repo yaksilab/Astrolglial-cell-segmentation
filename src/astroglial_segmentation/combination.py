@@ -1,5 +1,6 @@
 import numpy as np
 import glob
+from .utils import reassign_consecutive_labels
 
 
 def extend_and_merge_masks(mask1, mask2, overlap_threshold):
@@ -24,30 +25,60 @@ def extend_and_merge_masks(mask1, mask2, overlap_threshold):
 
     new_label = max(labels1, default=0) + 1
 
+    total_overlaps = {}
+
     for label2 in labels2:
         mask2_region = mask2 == label2
-        overlapping_labels = []
+        mask2_area = np.sum(mask2_region)
+        overlaps = []
 
         for label1 in labels1:
             mask1_region = mask1 == label1
 
             overlap = np.sum(mask2_region & mask1_region)
-            mask2_area = np.sum(mask2_region)
+            mask1_area = np.sum(mask1_region)
 
-            if overlap / mask2_area > overlap_threshold:
-                overlapping_labels.append(label1)
-                # print(
-                #     f"Overlap detected between {label1} and {label2}: {overlap / mask2_area}"
-                # )
+            if (
+                overlap / mask2_area > overlap_threshold
+                or overlap / mask1_area > overlap_threshold
+            ):
+                overlaps.append(label1)
 
-        if overlapping_labels:
-            for ol_label in overlapping_labels:
-                extended_mask[extended_mask == ol_label] = new_label
-            extended_mask[mask2_region] = new_label
-            new_label += 1
+        if overlaps:
+            total_overlaps[label2] = overlaps
         else:
-            extended_mask[mask2_region] = new_label
+            extended_mask[mask2 == label2] = new_label
             new_label += 1
+    # Here i devide the important overlapping regions into two groups. These two groups contains two critical overlap cases that appear. one is that when several masks from
+    # From mask2 is overlapping with one mask from mask1. The other case is that when one mask from mask2 is overlapping with several masks from mask1.
+    # This makes it easier to merge related masks with each other for better segmentation.
+    overlaps_label1 = (
+        {}
+    )  # overlapping masks from mask1 to mask2, keys here are the labels from mask1
+    overlaps_label2 = (
+        {}
+    )  # overlapping masks from mask2 to mask1, keys here are the labels from mask2
+
+    for label2, label1_overlaps in total_overlaps.items():
+        if len(label1_overlaps) > 1:
+            overlaps_label2[label2] = label1_overlaps
+        else:
+            if label1_overlaps[0] in overlaps_label1:
+                overlaps_label1[label1_overlaps[0]].append(label2)
+            else:
+                overlaps_label1[label1_overlaps[0]] = [label2]
+
+    for label1, label2_overlaps in overlaps_label1.items():
+        extended_mask[mask1 == label1] = new_label
+        for label2 in label2_overlaps:
+            extended_mask[mask2 == label2] = new_label
+        new_label += 1
+
+    for label2, label1_overlaps in overlaps_label2.items():
+        extended_mask[mask2 == label2] = new_label
+        for label1 in label1_overlaps:
+            extended_mask[mask1 == label1] = new_label
+        new_label += 1
 
     return extended_mask
 
@@ -84,5 +115,6 @@ def combine_masks(
         combined_mask, outflow_mask, overlap_threshold_processes
     )
     masks = extend_and_merge_masks(masks, body_mask, overlap_threshold_body)
+    masks = reassign_consecutive_labels(masks)
 
     return masks

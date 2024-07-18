@@ -17,7 +17,7 @@ install_requires = [
 
 setup_kwargs = {
     "name": "astroglial_segmentation",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "doing cell detection and segmentation of radial glial of zebra fish brain cells",
     "long_description": "# Astrolglial-cell-segmentation\n\nThis project aims to segment astroglial cells from mean images generated from motion corrected movie in suite2p. \n\n## Installation\n\nClone the repository and install the required packages using the following command:\n\n```bash\ngit clone https://github.com/yaksilab/Astrolglial-cell-segmentation.git\n```\n\nOpen Anaconda promt and create an anaconda environment with the projects environment.yml file:\n\n```bash\ncd Astrolglial-cell-segmentation\n```\n\n```bash\nconda env create -f environment.yml\n```\n\nActivate the environment:\n\n```bash\nconda activate Astroglial-segmentation\n```\n\ninstall the dependencies from the projects requirements.txt file:\n\n```bash\npip install -r requirements.txt\n```\n\n\n## Usage\n Activate the environment:\n\n```bash\nconda activate Astroglial-segmentation\n```\n\nGo into the project directory:\n\n```bash\ncd Astrolglial-cell-segmentation\n```\n\nRun the pipeline on your suite2p output folder:\n\n```bash\npython -m src.pipeline <path to your suit2p output folder>\n```",
     "author": "javidr",

@@ -86,3 +86,22 @@ def transform_mean_image_for_plotting(mean_image):
             im0 = np.uint8(np.clip(im0, 0, 1) * 255)
 
     return im0
+
+
+def reassign_consecutive_labels(mask):
+    """Reassigns consecutive labels to mask
+
+    Args:
+        mask (np.ndarray): mask to be relabelled
+
+    Returns:
+        np.ndarray: relabelled mask
+    """
+    labels = np.unique(mask)
+    labels = list(labels[labels != 0])
+    new_mask = mask.copy()
+    new_label = 1
+    for label in labels:
+        new_mask[mask == label] = new_label
+        new_label += 1
+    return new_mask
