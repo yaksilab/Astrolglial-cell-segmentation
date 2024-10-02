@@ -15,7 +15,7 @@ from suite2p.extraction.masks import (
 from pathlib import Path
 
 
-def create_suite2p_masks_extract_traces(working_dir):
+def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean_image_seg.npy"):
     wd = Path(working_dir)
     ops_file = wd / "ops.npy"
     if not ops_file.exists():
@@ -26,7 +26,7 @@ def create_suite2p_masks_extract_traces(working_dir):
     Ly = ops["Ly"]
     f_reg = suite2p.io.BinaryFile(Ly, Lx, wd / "data.bin")
 
-    cellpose_fpath = wd / "combined_mean_image_seg.npy"
+    cellpose_fpath = wd / cp_seg_file
     if not cellpose_fpath.exists():
         raise FileNotFoundError(
             f"The combined mask file is not found: {cellpose_fpath}"
