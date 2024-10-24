@@ -7,12 +7,10 @@ import numpy as np
 import suite2p
 from suite2p.detection import roi_stats
 from suite2p.extraction.masks import (
-    create_cell_pix,
-    create_neuropil_masks,
     create_masks,
-    create_cell_mask,
 )
 from pathlib import Path
+import os
 
 
 def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean_image_seg.npy"):
@@ -80,10 +78,13 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
         F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"]
     )
 
-    # Overwrite files in wd folder (consider backing up this folder first)
-    np.save(wd / "F.npy", F)
-    np.save(wd / "Fneu.npy", Fneu)
-    np.save(wd / "iscell.npy", iscell)
-    np.save(wd / "ops.npy", ops)
-    np.save(wd / "spks.npy", spks)
-    np.save(wd / "stat.npy", stat)
+    new_dir = wd / "cellpose_extraction"
+
+    os.makedirs(new_dir, exist_ok=True)
+
+    np.save(new_dir / "F.npy", F)
+    np.save(new_dir / "Fneu.npy", Fneu)
+    np.save(new_dir / "iscell.npy", iscell)
+    np.save(new_dir / "ops.npy", ops)
+    np.save(new_dir / "spks.npy", spks)
+    np.save(new_dir / "stat.npy", stat)
