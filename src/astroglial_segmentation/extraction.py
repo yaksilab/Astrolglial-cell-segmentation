@@ -78,7 +78,7 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
         F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"]
     )
 
-    new_dir = wd / "cellpose_extraction"
+    new_dir = wd / "cellpose_suite2p_output"
 
     os.makedirs(new_dir, exist_ok=True)
 
