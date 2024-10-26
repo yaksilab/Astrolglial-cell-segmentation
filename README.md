@@ -17,7 +17,7 @@ cd Astrolglial-cell-segmentation
 ```
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment.yaml
 ```
 
 Activate the environment:

@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import os
 from .combination import combine_masks
 
-io.logger_setup()
-
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,7 +15,7 @@ model_dir1 = os.path.join(base_dir, "../models/CP2_s3_039234")  # processes
 model_dir2 = os.path.join(base_dir, "../models/CP2_s2_039234")  # body
 model_dir3 = os.path.join(
     base_dir, "../models/CP2_s1_039189"
-)  # body plus processes in one model
+)  # complete cell
 model_dirs = [model_dir1, model_dir2, model_dir3]
 
 
@@ -34,17 +32,10 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
         numpy.ndarray: The flows array containing flows[0] beings masks, flows[1] being gradient flow, flows[2] cellprobability.
     """
 
-    masks, flows, styles = model.eval(
+    masks, flows, _ = model.eval(
         mean_image, channels=[0, 0], flow_threshold=1.0, cellprob_threshold=0.0
     )
-    # fig = plt.figure(figsize=(15, 10))
-    # plot.show_segmentation(fig, mean_image, masks, flows[0], channels=[0, 0])
 
-    # plt.tight_layout()
-    # plt.show()
-    # mask_overlay = plot.mask_overlay(im0, masks)
-    # plt.imshow(mask_overlay)git status
-    # plt.show()
     io.masks_flows_to_seg(
         mean_image, masks, flows, model.diam_labels, file_names=file_name
     )
@@ -53,6 +44,8 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
 
 
 def segment_cells(data_path, model_dirs=model_dirs):
+    io.logger_setup()
+
 
     try:
         ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
