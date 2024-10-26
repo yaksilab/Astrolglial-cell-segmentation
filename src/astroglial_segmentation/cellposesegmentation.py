@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import os
 from .combination import combine_masks
 
-io.logger_setup()
-
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -46,6 +44,8 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
 
 
 def segment_cells(data_path, model_dirs=model_dirs):
+    io.logger_setup()
+
 
     try:
         ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
