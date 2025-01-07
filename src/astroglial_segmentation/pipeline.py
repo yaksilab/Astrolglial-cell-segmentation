@@ -3,11 +3,12 @@ from .extraction import create_suite2p_masks_extract_traces
 import argparse
 
 
-def main_pipeline(data_path):
+def main_pipeline(data_path,flow_threshold, cellprob_threshold):
 
     # Do cellpose segmentation and mask combination
     print("\n Starting cellpose segmentation and mask combination... \n")
-    segment_cells(data_path)
+    segment_cells(data_path,flow_threshold, cellprob_threshold)
+
     print("\n Cellpose segmentation and mask combination complete! \n")
 
     # Use cobined masks from previous step to create suite2p masks and extract traces
