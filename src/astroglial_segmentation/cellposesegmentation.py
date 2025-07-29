@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import os
 from .combination import combine_masks
 from scipy.signal import medfilt2d
-
-from PIL import Image
 import cv2
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
