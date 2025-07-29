@@ -6,7 +6,6 @@ https://github.com/MouseLand/suite2p/issues/292#issuecomment-1539041902
 import numpy as np
 import suite2p
 from suite2p.detection import roi_stats
-from suite2p.extraction import extraction_wrapper
 from suite2p.extraction.masks import (
     create_masks,
 )
@@ -23,7 +22,7 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
     ops = np.load(ops_file, allow_pickle=True).item()
     Lx = ops["Lx"]
     Ly = ops["Ly"]
-    f_reg = suite2p.io.BinaryFile(Ly, Lx, wd / "data_chan2.bin")
+    f_reg = suite2p.io.BinaryFile(Ly, Lx, wd / "data.bin")
 
     cellpose_fpath = wd / cp_seg_file
     if not cellpose_fpath.exists():
@@ -33,7 +32,6 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
 
     cellpose_masks = np.load(cellpose_fpath, allow_pickle=True).item()
     masks = cellpose_masks["masks"]
-   
 
     stat = []
     for u_ix, u in enumerate(np.unique(masks)[1:]):
