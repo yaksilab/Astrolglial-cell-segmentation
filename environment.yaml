@@ -1,4 +1,4 @@
-name: astroglial-segmentation
+name: astroglial-segmentation-dualChannel
 
 channels:
   - default
