@@ -11,13 +11,13 @@ import cv2
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-data_path = os.path.join(base_dir, "../data")
+data_path = os.path.join(base_dir, "../../data")
 
 # Construct the absolute paths for the model directories
-model_dir1 = os.path.join(base_dir, "../models/CP2_s3_039234")  # processes
-model_dir2 = os.path.join(base_dir, "../models/CP2_s2_039234")  # body
+model_dir1 = os.path.join(base_dir, "models/CP2_s3_039234")  # processes
+model_dir2 = os.path.join(base_dir, "models/CP2_s2_039234")  # body
 model_dir3 = os.path.join(
-    base_dir, "../models/CP2_s1_039189"
+    base_dir, "models/CP2_s1_039189"
 )  # complete cell
 model_dirs = [model_dir1, model_dir2, model_dir3]
 

@@ -1,8 +1,5 @@
-name: astroglial-segmentation-dualChannel
-
-channels:
-  - default
-  - conda-forge
+name: astroglial-segmentation-extraction
 
 dependencies:
   - python=3.9.18
+  - pip
