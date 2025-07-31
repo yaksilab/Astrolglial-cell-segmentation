@@ -1,5 +1,10 @@
 # Astro-glial Cell Segmentation
 
+![segmented complete cell](image.png)
+![Segmented cell body](image-1.png)
+![Segmented processes](image-2.png)
+![Combined segmentation](image-3.png)
+
 ## Overview
 This document details the process of astro-glial cell segmentation using a mean image from a motion-corrected movie in Suite2p. The segmentation process employs custom-trained Cellpose models, each targeting specific parts of astroglial cells. By combining multiple Cellpose models, we achieve optimal segmentation, which is subsequently used for data processing and trace extraction with Suite2p.
 
