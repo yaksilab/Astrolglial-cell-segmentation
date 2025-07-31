@@ -13,9 +13,7 @@ data_path = os.path.join(base_dir, "../../data")
 # Construct the absolute paths for the model directories
 model_dir1 = os.path.join(base_dir, "models/CP2_s3_039234")  # processes
 model_dir2 = os.path.join(base_dir, "models/CP2_s2_039234")  # body
-model_dir3 = os.path.join(
-    base_dir, "models/CP2_s1_039189"
-)  # complete cell
+model_dir3 = os.path.join(base_dir, "models/CP2_s1_039189")  # complete cell
 model_dirs = [model_dir1, model_dir2, model_dir3]
 
 
@@ -43,36 +41,76 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
     return flows
 
 
-def segment_cells(data_path, model_dirs=model_dirs):
-    io.logger_setup()
+def segment_cells(
+    data_path, segmentation_channel=1, image_type="meanImg", model_dirs=model_dirs
+):
+    """
+    Perform segmentation using multiple Cellpose models and combine the results.
 
+    Args:
+        data_path (str): Path to Suite2p output folder
+        segmentation_channel (int): Channel to use for segmentation (1 or 2)
+        image_type (str): Type of image to use for segmentation
+                         ('meanImg', 'meanImg_chan2', 'meanImgE', 'max_proj')
+        model_dirs (list): List of model directories to use for segmentation
+    """
+    io.logger_setup()
 
     try:
         ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
     except FileNotFoundError:
         print("Ops file not found.")
         raise SystemExit
-    mean_image = ops["meanImg"]
+
+    # Select the appropriate image based on image_type parameter
+    available_images = {
+        "meanImg": "meanImg",
+        "meanImg_chan2": "meanImg_chan2",
+        "meanImgE": "meanImgE",
+        "max_proj": "max_proj",
+    }
+
+    if image_type not in available_images:
+        raise ValueError(
+            f"Invalid image_type '{image_type}'. Available options: {list(available_images.keys())}"
+        )
+
+    image_key = available_images[image_type]
+
+    if image_key not in ops:
+        raise KeyError(
+            f"Image type '{image_type}' (key: '{image_key}') not found in ops file. Available keys: {list(ops.keys())}"
+        )
+
+    mean_image = ops[image_key]
+
+    print(f"Using {image_type} for segmentation on channel {segmentation_channel}")
+    print(f"Image shape: {mean_image.shape}")
 
     for model_dir in model_dirs:
         print(f"Segmenting using {model_dir}")
         model = models.CellposeModel(pretrained_model=model_dir)
         # Save mean_image as PNG for compatibility with Cellpose
         model_name = os.path.basename(model_dir)
-        plt.imsave(data_path + f"/{model_name}_mean_image.png", mean_image, cmap="gray")
+        output_filename = f"{model_name}_{image_type}_ch{segmentation_channel}"
+        plt.imsave(data_path + f"/{output_filename}.png", mean_image, cmap="gray")
 
         flows = cellpose_segmentation(
             mean_image,
             model,
-            file_name=data_path + f"/{model_name}_mean_image",
+            file_name=data_path + f"/{output_filename}",
         )
 
-    masks = combine_masks(data_path)
+    masks = combine_masks(
+        data_path, image_type=image_type, channel=segmentation_channel
+    )
 
+    # Save combined result with descriptive filename
+    combined_filename = f"combined_{image_type}_ch{segmentation_channel}"
     io.masks_flows_to_seg(
         mean_image,
         masks,
         flows=flows,
         diams=30.0,
-        file_names=data_path + "/combined_mean_image",
+        file_names=data_path + f"/{combined_filename}",
     )

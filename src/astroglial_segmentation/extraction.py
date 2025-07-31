@@ -9,11 +9,23 @@ from suite2p.detection import roi_stats
 from suite2p.extraction.masks import (
     create_masks,
 )
+from suite2p.io.binary import BinaryFile
 from pathlib import Path
 import os
 
 
-def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean_image_seg.npy"):
+def create_suite2p_masks_extract_traces(
+    working_dir, extraction_channel=1, cp_seg_file=None
+):
+    """
+    Create Suite2p compatible masks and extract traces.
+
+    Args:
+        working_dir (str): Path to Suite2p output folder
+        extraction_channel (int): Channel to use for extraction (1 or 2)
+        cp_seg_file (str, optional): Specific segmentation file to use.
+                                   If None, will look for combined mask file.
+    """
     wd = Path(working_dir)
     ops_file = wd / "ops.npy"
     if not ops_file.exists():
@@ -22,7 +34,34 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
     ops = np.load(ops_file, allow_pickle=True).item()
     Lx = ops["Lx"]
     Ly = ops["Ly"]
-    f_reg = suite2p.io.BinaryFile(Ly, Lx, wd / "data.bin")
+
+    # Handle channel selection for extraction
+    f_reg = BinaryFile(Ly, Lx, str(wd / "data.bin"))
+    f_reg_chan2 = None
+
+    if extraction_channel == 2:
+        # Check if channel 2 data exists
+        chan2_file = wd / "data_chan2.bin"
+        if chan2_file.exists():
+            f_reg_chan2 = BinaryFile(Ly, Lx, str(chan2_file))
+            print(f"Using channel {extraction_channel} for extraction")
+        else:
+            print(f"Warning: Channel 2 data file not found, falling back to channel 1")
+            extraction_channel = 1
+
+    # Auto-detect combined segmentation file if not specified
+    if cp_seg_file is None:
+        # Look for combined mask files with new naming convention first
+        import glob
+
+        combined_files = glob.glob(str(wd / "combined_*_seg.npy"))
+        if combined_files:
+            cp_seg_file = Path(combined_files[0]).name
+            print(f"Auto-detected segmentation file: {cp_seg_file}")
+        else:
+            # Fallback to legacy naming
+            cp_seg_file = "combined_mean_image_seg.npy"
+            print(f"Using default segmentation file: {cp_seg_file}")
 
     cellpose_fpath = wd / cp_seg_file
     if not cellpose_fpath.exists():
@@ -56,7 +95,7 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
 
     # Feed these values into the wrapper functions
     stat_after_extraction, F, Fneu, F_chan2, Fneu_chan2 = suite2p.extraction_wrapper(
-        stat, f_reg, f_reg_chan2=None, ops=ops
+        stat, f_reg, f_reg_chan2=f_reg_chan2, ops=ops
     )
 
     # Do cell classification
@@ -64,7 +103,17 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
     iscell = suite2p.classify(stat=stat_after_extraction, classfile=classfile)
 
     # Apply preprocessing step for deconvolution
-    dF = F.copy() - ops["neucoeff"] * Fneu
+    # Use the appropriate fluorescence data based on extraction channel
+    if extraction_channel == 2 and F_chan2 is not None:
+        F_extract = F_chan2.copy()
+        Fneu_extract = Fneu_chan2.copy()
+        print("Using channel 2 fluorescence data for preprocessing")
+    else:
+        F_extract = F.copy()
+        Fneu_extract = Fneu.copy()
+        print("Using channel 1 fluorescence data for preprocessing")
+
+    dF = F_extract - ops["neucoeff"] * Fneu_extract
     dF = suite2p.extraction.preprocess(
         F=dF,
         baseline=ops["baseline"],
@@ -78,13 +127,25 @@ def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean
         F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"]
     )
 
-    new_dir = wd / "cellpose_suite2p_output"
+    new_dir = wd / f"cellpose_suite2p_output_ch{extraction_channel}"
 
     os.makedirs(new_dir, exist_ok=True)
 
+    # Save both channel data if available
     np.save(new_dir / "F.npy", F)
     np.save(new_dir / "Fneu.npy", Fneu)
+    if F_chan2 is not None:
+        np.save(new_dir / "F_chan2.npy", F_chan2)
+        np.save(new_dir / "Fneu_chan2.npy", Fneu_chan2)
+
+    # Save the processed data from the selected extraction channel
+    np.save(new_dir / f"F_processed_ch{extraction_channel}.npy", F_extract)
+    np.save(new_dir / f"Fneu_processed_ch{extraction_channel}.npy", Fneu_extract)
+
     np.save(new_dir / "iscell.npy", iscell)
     np.save(new_dir / "ops.npy", ops)
     np.save(new_dir / "spks.npy", spks)
     np.save(new_dir / "stat.npy", stat)
+
+    print(f"Extraction complete! Results saved to: {new_dir}")
+    print(f"Extracted {len(stat)} ROIs using channel {extraction_channel}")

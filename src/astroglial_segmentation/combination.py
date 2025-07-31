@@ -84,13 +84,19 @@ def extend_and_merge_masks(mask1, mask2, overlap_threshold):
 
 
 def combine_masks(
-    data_path, overlap_threshold_processes=0.15, overlap_threshold_body=0.35
+    data_path,
+    image_type="meanImg",
+    channel=1,
+    overlap_threshold_processes=0.15,
+    overlap_threshold_body=0.35,
 ):
     """
     Combines the masks from the three cellpose models
 
     Args:
         data_path (str): path to the data folder
+        image_type (str): type of image used for segmentation
+        channel (int): channel used for segmentation
         overlap_threshold_processes (float, optional): overlap threshold for processes. Defaults to 0.15.
         overlap_threshold_body (float, optional): overlap threshold for body. Defaults to 0.35.
 
@@ -99,13 +105,32 @@ def combine_masks(
     """
 
     try:
-        combined_mask_file = glob.glob(data_path + "/*s1*.npy")[0]
-        body_mask_file = glob.glob(data_path + "/*s2*.npy")[0]
-        outflow_mask_file = glob.glob(data_path + "/*s3*.npy")[0]
+        # Update glob patterns to match new naming convention
+        pattern_s1 = f"*s1*{image_type}_ch{channel}*.npy"
+        pattern_s2 = f"*s2*{image_type}_ch{channel}*.npy"
+        pattern_s3 = f"*s3*{image_type}_ch{channel}*.npy"
+
+        combined_mask_file = glob.glob(data_path + "/" + pattern_s1)[0]
+        body_mask_file = glob.glob(data_path + "/" + pattern_s2)[0]
+        outflow_mask_file = glob.glob(data_path + "/" + pattern_s3)[0]
+
+        print(f"Found mask files:")
+        print(f"  Combined (s1): {combined_mask_file}")
+        print(f"  Body (s2): {body_mask_file}")
+        print(f"  Outflow (s3): {outflow_mask_file}")
+
     except IndexError:
-        raise FileNotFoundError(
-            "One or more mask files not found in the specified data path. Looking for files with s1, s2, s3 in the name."
-        )
+        # Fallback to old naming convention for backward compatibility
+        try:
+            combined_mask_file = glob.glob(data_path + "/*s1*.npy")[0]
+            body_mask_file = glob.glob(data_path + "/*s2*.npy")[0]
+            outflow_mask_file = glob.glob(data_path + "/*s3*.npy")[0]
+            print("Using legacy mask file naming convention")
+        except IndexError:
+            raise FileNotFoundError(
+                f"One or more mask files not found in the specified data path. "
+                f"Looking for files matching patterns: {pattern_s1}, {pattern_s2}, {pattern_s3}"
+            )
 
     body_mask = np.load(body_mask_file, allow_pickle=True).item()["masks"]
     outflow_mask = np.load(outflow_mask_file, allow_pickle=True).item()["masks"]
