@@ -4,55 +4,33 @@ This project aims to segment astroglial cells from mean images generated from mo
 
 ## Installation
 
-Clone the repository and install the required packages using the following command:
+
+Open Anaconda promt and create an minimal conda environment with the projects environment.yml file:
 
 ```bash
-git clone https://github.com/yaksilab/Astrolglial-cell-segmentation.git
-```
-
-Open Anaconda promt and create an anaconda environment with the projects environment.yml file:
-
-```bash
-cd Astrolglial-cell-segmentation
-```
-
-```bash
-conda env create -f environment.yaml
+conda create --name astroglial-seg-extraction python=3.9
 ```
 
 Activate the environment:
 
 ```bash
-conda activate Astroglial-segmentation
+conda activate astroglial-seg-extraction
 ```
 
-install the dependencies from the projects requirements.txt file:
+install the project from this repository:
 
 ```bash
-pip install -r requirements.txt
+pip install git+https://github.com/yaksilab/Astrolglial-cell-segmentation.git
 ```
-
-install the project as a package in your conda environment:
-
-```bash
-pip install -e .
-```
-
-
 
 
 ## Usage
  Activate the environment:
 
 ```bash
-conda activate Astroglial-segmentation
+conda activate astroglial-seg-extraction
 ```
 
-Go into the project directory:
-
-```bash
-cd Astrolglial-cell-segmentation
-```
 
 Run the pipeline on your suite2p output folder:
 
