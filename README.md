@@ -2,24 +2,23 @@
 
 This project aims to segment astroglial cells from mean images generated from motion corrected movie in suite2p. 
 
-More documentation can be found in the [docs](docs\README.md).
+More documentation can be found in the [docs](docs/README.md).
 
 ## Installation
 
 
-Open Anaconda promt and create an minimal conda environment with the projects environment.yml file:
+Open Anaconda promt and create an minimal conda environment:
 
 ```bash
 conda create --name astroglial-seg-extraction python=3.9
 ```
-
 Activate the environment:
 
 ```bash
 conda activate astroglial-seg-extraction
 ```
 
-install the project from this repository:
+Install the project from this repository:
 
 ```bash
 pip install git+https://github.com/yaksilab/Astrolglial-cell-segmentation.git

@@ -22,7 +22,7 @@ Three distinct Cellpose models were trained on different parts of astroglial cel
 The seed sets comprise the same set of nine mean images, each with different mask overlays corresponding to different parts of the cells as described above.
 
 ## Augmentation of Seed Sets
-During the training phase, we used a straightforward augmentation technique for the seed images, creating approximately 20-fold copies of the seed images, resulting in around 200 training images. While this simple augmentation approach pose to overfitting issues, the models still performed satisfactorily. They were tested on at least one unseen test image and produced good results. This approach significantly reduced the amount work required.
+During the training phase, we used a straightforward augmentation technique for the seed images, creating approximately 20-fold copies of the seed images, resulting in around 200 training images. While this simple augmentation approach poses overfitting issues, the models still performed satisfactorily. They were tested on at least one unseen test image and produced good results. This approach significantly reduced the amount of work required.
 
 
 ## Training Cellpose Models
@@ -60,7 +60,7 @@ The results of each model were evaluated through visual inspection of the predic
 
 ## Combining the Models
 The motivation behind combining the models is from poor performance of a single model in masking a complicated cell structure such as astroglial cells. Cellpose does it better in only masking simple cell structures, such as simple round cells.
-Cells within our dataset are complicated, there are cells that have welldefined cellbodies with processes, cells that have only cellbodies, and orphaned processes. 
+Cells within our dataset are complicated, there are cells that have well-defined cell bodies with processes, cells that have only cell bodies, and orphaned processes. 
 Instead of training a single general model, we opted for an ensemble of models to leverage the unique strengths of each individual model. This approach allows for more precise segmentation, as different models excel in identifying specific features of astroglial cells. The combined model offers the best overall performance:
 
 - **Model 1**: Provides the base mask.
@@ -71,4 +71,4 @@ Instead of training a single general model, we opted for an ensemble of models t
 The combined mask is used for data processing and trace extraction within Suite2p. 
 
 ## Further Work
-Each cellpose models can be imporived with more seed images and better augmentation techniques. The models can also be trained on more diverse datasets to improve their generalization capabilities.
+Each Cellpose model can be improved with more seed images and better augmentation techniques. The models can also be trained on more diverse datasets to improve their generalization capabilities.
