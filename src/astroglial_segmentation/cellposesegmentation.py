@@ -42,6 +42,13 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
 
 
 def segment_cells(data_path, model_dirs=model_dirs):
+    """
+    Segment cells using multiple Cellpose models and combine the results.
+    Args:
+        data_path (str): Path to the directory containing 'ops.npy' and 'data.bin'.
+        model_dirs (list, optional): List of paths to the Cellpose model directories. Defaults to predefined model directories.
+    """
+
     io.logger_setup()
 
     try:
@@ -64,8 +71,11 @@ def segment_cells(data_path, model_dirs=model_dirs):
             file_name=data_path + f"/{model_name}_mean_image",
         )
 
+    # Combine the masks from the three models using their saved files _seg.npy files in data_path
     masks = combine_masks(data_path)
 
+    # Writes the combined masks to a _seg.npy file
+    # Note the flows here are from the last model used in the loop above
     io.masks_flows_to_seg(
         mean_image,
         masks,
