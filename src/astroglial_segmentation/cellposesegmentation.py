@@ -11,9 +11,9 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(base_dir, "../../data")
 
 # Construct the absolute paths for the model directories
-model_dir1 = os.path.join(base_dir, "models/CP2_s3_039234")  # processes
-model_dir2 = os.path.join(base_dir, "models/CP2_s2_039234")  # body
-model_dir3 = os.path.join(base_dir, "models/CP2_s1_039189")  # complete cell
+model_dir1 = os.path.join(base_dir, "../models/CP2_s3_039234")  # processes
+model_dir2 = os.path.join(base_dir, "../models/CP2_s2_039234")  # body
+model_dir3 = os.path.join(base_dir, "../models/CP2_s1_039189")  # complete cell
 model_dirs = [model_dir1, model_dir2, model_dir3]
 
 
@@ -35,25 +35,20 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
     )
 
     io.masks_flows_to_seg(
-        mean_image, masks, flows, model.diam_labels, file_names=file_name
+        mean_image, masks, flows, diams=model.diam_labels, file_names=file_name
     )
 
     return flows
 
 
-def segment_cells(
-    data_path, segmentation_channel=1, image_type="meanImg", model_dirs=model_dirs
-):
+def segment_cells(data_path, model_dirs=model_dirs):
     """
-    Perform segmentation using multiple Cellpose models and combine the results.
-
+    Segment cells using multiple Cellpose models and combine the results.
     Args:
-        data_path (str): Path to Suite2p output folder
-        segmentation_channel (int): Channel to use for segmentation (1 or 2)
-        image_type (str): Type of image to use for segmentation
-                         ('meanImg', 'meanImg_chan2', 'meanImgE', 'max_proj')
-        model_dirs (list): List of model directories to use for segmentation
+        data_path (str): Path to the directory containing 'ops.npy' and 'data.bin'.
+        model_dirs (list, optional): List of paths to the Cellpose model directories. Defaults to predefined model directories.
     """
+
     io.logger_setup()
 
     try:
@@ -101,12 +96,11 @@ def segment_cells(
             file_name=data_path + f"/{output_filename}",
         )
 
-    masks = combine_masks(
-        data_path, image_type=image_type, channel=segmentation_channel
-    )
+    # Combine the masks from the three models using their saved files _seg.npy files in data_path
+    masks = combine_masks(data_path)
 
-    # Save combined result with descriptive filename
-    combined_filename = f"combined_{image_type}_ch{segmentation_channel}"
+    # Writes the combined masks to a _seg.npy file
+    # Note the flows here are from the last model used in the loop above
     io.masks_flows_to_seg(
         mean_image,
         masks,

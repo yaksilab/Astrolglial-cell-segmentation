@@ -4,28 +4,34 @@ https://github.com/MouseLand/suite2p/issues/292#issuecomment-1539041902
 """
 
 import numpy as np
-import suite2p
+
+from suite2p import extraction_wrapper, classify
+from suite2p.io import BinaryFile
 from suite2p.detection import roi_stats
-from suite2p.extraction.masks import (
-    create_masks,
-)
-from suite2p.io.binary import BinaryFile
+from suite2p.extraction import preprocess, oasis
+from suite2p.classification import builtin_classfile
+from suite2p.extraction.masks import create_masks
 from pathlib import Path
 import os
 
 
 def create_suite2p_masks_extract_traces(
-    working_dir, extraction_channel=1, cp_seg_file=None
+    working_dir, cp_seg_file="combined_mean_image_seg.npy", new_output_dir: bool = True
 ):
     """
-    Create Suite2p compatible masks and extract traces.
+    Create suite2p masks from cellpose segmentation and extract traces.
 
     Args:
-        working_dir (str): Path to Suite2p output folder
-        extraction_channel (int): Channel to use for extraction (1 or 2)
-        cp_seg_file (str, optional): Specific segmentation file to use.
-                                   If None, will look for combined mask file.
+        working_dir (str):
+            Path to the working directory containing 'ops.npy' and 'data.bin'.
+        cp_seg_file (str, optional):
+            Name of the combined mask file from cellpose segmentation.
+            Defaults to "combined_mean_image_seg.npy".
+        new_output_dir (bool, optional):
+            Whether to save outputs in a new directory named 'cellpose_suite2p_output'.
+            Defaults to True. If False, overwrites existing suite2p result files in working_dir.
     """
+
     wd = Path(working_dir)
     ops_file = wd / "ops.npy"
     if not ops_file.exists():
@@ -34,34 +40,7 @@ def create_suite2p_masks_extract_traces(
     ops = np.load(ops_file, allow_pickle=True).item()
     Lx = ops["Lx"]
     Ly = ops["Ly"]
-
-    # Handle channel selection for extraction
     f_reg = BinaryFile(Ly, Lx, str(wd / "data.bin"))
-    f_reg_chan2 = None
-
-    if extraction_channel == 2:
-        # Check if channel 2 data exists
-        chan2_file = wd / "data_chan2.bin"
-        if chan2_file.exists():
-            f_reg_chan2 = BinaryFile(Ly, Lx, str(chan2_file))
-            print(f"Using channel {extraction_channel} for extraction")
-        else:
-            print(f"Warning: Channel 2 data file not found, falling back to channel 1")
-            extraction_channel = 1
-
-    # Auto-detect combined segmentation file if not specified
-    if cp_seg_file is None:
-        # Look for combined mask files with new naming convention first
-        import glob
-
-        combined_files = glob.glob(str(wd / "combined_*_seg.npy"))
-        if combined_files:
-            cp_seg_file = Path(combined_files[0]).name
-            print(f"Auto-detected segmentation file: {cp_seg_file}")
-        else:
-            # Fallback to legacy naming
-            cp_seg_file = "combined_mean_image_seg.npy"
-            print(f"Using default segmentation file: {cp_seg_file}")
 
     cellpose_fpath = wd / cp_seg_file
     if not cellpose_fpath.exists():
@@ -94,27 +73,17 @@ def create_suite2p_masks_extract_traces(
     cell_masks, neuropil_masks = create_masks(stat, Ly, Lx, ops)
 
     # Feed these values into the wrapper functions
-    stat_after_extraction, F, Fneu, F_chan2, Fneu_chan2 = suite2p.extraction_wrapper(
-        stat, f_reg, f_reg_chan2=f_reg_chan2, ops=ops
+    stat_after_extraction, F, Fneu, _, _ = extraction_wrapper(
+        stat, f_reg, f_reg_chan2=None, ops=ops
     )
 
     # Do cell classification
-    classfile = suite2p.classification.builtin_classfile
-    iscell = suite2p.classify(stat=stat_after_extraction, classfile=classfile)
+    classfile = builtin_classfile
+    iscell = classify(stat=stat_after_extraction, classfile=classfile)
 
     # Apply preprocessing step for deconvolution
-    # Use the appropriate fluorescence data based on extraction channel
-    if extraction_channel == 2 and F_chan2 is not None:
-        F_extract = F_chan2.copy()
-        Fneu_extract = Fneu_chan2.copy()
-        print("Using channel 2 fluorescence data for preprocessing")
-    else:
-        F_extract = F.copy()
-        Fneu_extract = Fneu.copy()
-        print("Using channel 1 fluorescence data for preprocessing")
-
-    dF = F_extract - ops["neucoeff"] * Fneu_extract
-    dF = suite2p.extraction.preprocess(
+    dF = F.copy() - ops["neucoeff"] * Fneu
+    dF = preprocess(
         F=dF,
         baseline=ops["baseline"],
         win_baseline=ops["win_baseline"],
@@ -123,11 +92,12 @@ def create_suite2p_masks_extract_traces(
         prctile_baseline=ops["prctile_baseline"],
     )
     # spikes
-    spks = suite2p.extraction.oasis(
-        F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"]
-    )
+    spks = oasis(F=dF, batch_size=ops["batch_size"], tau=ops["tau"], fs=ops["fs"])
 
-    new_dir = wd / f"cellpose_suite2p_output_ch{extraction_channel}"
+    if new_output_dir:
+        new_dir = wd / "cellpose_suite2p_output"
+    else:
+        new_dir = wd
 
     os.makedirs(new_dir, exist_ok=True)
 

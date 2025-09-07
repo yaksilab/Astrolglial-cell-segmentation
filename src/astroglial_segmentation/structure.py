@@ -3,10 +3,7 @@ from pprint import pprint
 import matplotlib.pyplot as plt
 
 
-data = np.load(
-    r"data/ops.npy",
-    allow_pickle=True,
-).item()
+# data = np.load("../data/im1_seg.npy", allow_pickle=True).item()
 # print("Keys in data: \n", data.keys())
 
 

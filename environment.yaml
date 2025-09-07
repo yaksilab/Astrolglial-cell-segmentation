@@ -1,5 +1,4 @@
-name: astroglial-segmentation-extraction
+name: astroglial-segmentation
 
 dependencies:
-  - python=3.9.18
-  - pip
+  - python=3.9
