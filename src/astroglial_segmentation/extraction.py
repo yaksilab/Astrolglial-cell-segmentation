@@ -13,7 +13,9 @@ from pathlib import Path
 import os
 
 
-def create_suite2p_masks_extract_traces(working_dir,cp_seg_file = "combined_mean_image_seg.npy"):
+def create_suite2p_masks_extract_traces(
+    working_dir, cp_seg_file="combined_mean_image_seg.npy"
+):
     wd = Path(working_dir)
     ops_file = wd / "ops.npy"
     if not ops_file.exists():

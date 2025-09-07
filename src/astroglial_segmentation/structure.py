@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 # data = np.load("../data/im1_seg.npy", allow_pickle=True).item()
-#print("Keys in data: \n", data.keys())
+# print("Keys in data: \n", data.keys())
 
 
 def print_data_structure(data, indent=""):

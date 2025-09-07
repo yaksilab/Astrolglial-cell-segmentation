@@ -13,9 +13,7 @@ data_path = os.path.join(base_dir, "../data")
 # Construct the absolute paths for the model directories
 model_dir1 = os.path.join(base_dir, "../models/CP2_s3_039234")  # processes
 model_dir2 = os.path.join(base_dir, "../models/CP2_s2_039234")  # body
-model_dir3 = os.path.join(
-    base_dir, "../models/CP2_s1_039189"
-)  # complete cell
+model_dir3 = os.path.join(base_dir, "../models/CP2_s1_039189")  # complete cell
 model_dirs = [model_dir1, model_dir2, model_dir3]
 
 
@@ -37,7 +35,7 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
     )
 
     io.masks_flows_to_seg(
-        mean_image, masks, flows, model.diam_labels, file_names=file_name
+        mean_image, masks, flows, diams=model.diam_labels, file_names=file_name
     )
 
     return flows
@@ -45,7 +43,6 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
 
 def segment_cells(data_path, model_dirs=model_dirs):
     io.logger_setup()
-
 
     try:
         ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
