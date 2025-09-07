@@ -1,17 +1,17 @@
 [tool.poetry]
 name = "astroglial_segmentation"
-version = "1.2.3"
+version = "1.2.4"
 description = "doing cell detection and segmentation of radial glial of zebra fish brain cells"
 authors = ["javidr <javidr@ntnu.no>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
-numpy = "^1.26.2"
-matplotlib = "^3.8.2"
+numpy = "^2.0.2"
+matplotlib = "^3.9.4"
 opencv-python = "^4.8.1.78"
-cellpose = "2.3.2"
-suite2p = "0.14.3"
+cellpose = "^3.1.1.2"
+suite2p = ">=0.14.0,<0.14.6"
 
 
 [build-system]

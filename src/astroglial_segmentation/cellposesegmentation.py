@@ -13,9 +13,7 @@ data_path = os.path.join(base_dir, "../data")
 # Construct the absolute paths for the model directories
 model_dir1 = os.path.join(base_dir, "../models/CP2_s3_039234")  # processes
 model_dir2 = os.path.join(base_dir, "../models/CP2_s2_039234")  # body
-model_dir3 = os.path.join(
-    base_dir, "../models/CP2_s1_039189"
-)  # complete cell
+model_dir3 = os.path.join(base_dir, "../models/CP2_s1_039189")  # complete cell
 model_dirs = [model_dir1, model_dir2, model_dir3]
 
 
@@ -37,15 +35,21 @@ def cellpose_segmentation(mean_image, model, file_name="mean_image"):
     )
 
     io.masks_flows_to_seg(
-        mean_image, masks, flows, model.diam_labels, file_names=file_name
+        mean_image, masks, flows, diams=model.diam_labels, file_names=file_name
     )
 
     return flows
 
 
 def segment_cells(data_path, model_dirs=model_dirs):
-    io.logger_setup()
+    """
+    Segment cells using multiple Cellpose models and combine the results.
+    Args:
+        data_path (str): Path to the directory containing 'ops.npy' and 'data.bin'.
+        model_dirs (list, optional): List of paths to the Cellpose model directories. Defaults to predefined model directories.
+    """
 
+    io.logger_setup()
 
     try:
         ops = np.load(data_path + "/ops.npy", allow_pickle=True).item()
@@ -67,8 +71,11 @@ def segment_cells(data_path, model_dirs=model_dirs):
             file_name=data_path + f"/{model_name}_mean_image",
         )
 
+    # Combine the masks from the three models using their saved files _seg.npy files in data_path
     masks = combine_masks(data_path)
 
+    # Writes the combined masks to a _seg.npy file
+    # Note the flows here are from the last model used in the loop above
     io.masks_flows_to_seg(
         mean_image,
         masks,
